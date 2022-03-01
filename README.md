@@ -19,3 +19,11 @@ words ~100 times and label them, then feed them into the training of our model.
 
 The project will produce a model that will label similar audio files and can be deployed on the edge.
 TODO: This should be updated over time as the project is fleshed out
+
+## Blog Ideas / Stages
+- Data Exploration / Initial model creation
+- Experiment tracking and model improvement
+- Model deployment
+
+# Usage
+Enter the virtual environment with `pipenv shell`
