@@ -5,6 +5,9 @@ name = "pypi"
 
 [packages]
 notebook = "*"
+keras = "*"
+tensorflow = "*"
+numba = "==0.53"
 
 [requires]
 python_version = "3.9"
