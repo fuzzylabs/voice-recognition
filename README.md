@@ -27,3 +27,11 @@ TODO: This should be updated over time as the project is fleshed out
 
 # Usage
 Enter the virtual environment with `pipenv shell`
+Install dependencies with `pipenv install`
+
+Download data with `dvc pull`, if you want to push to dvc you need to authenticate:
+```shell
+dvc remote modify origin --local auth basic
+dvc remote modify origin --local user <DagsHub-user-name>
+dvc remote modify origin --local password <Token>
+```
