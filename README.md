@@ -35,3 +35,8 @@ dvc remote modify origin --local auth basic
 dvc remote modify origin --local user <DagsHub-user-name>
 dvc remote modify origin --local password <Token>
 ```
+
+To swap to a different branch, first switch to that branch in git, e.g.:
+`git checkout master`
+Then checkout the data with dvc:
+`dvc checkout`
