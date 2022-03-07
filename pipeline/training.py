@@ -15,7 +15,7 @@ class LSTMConfig(BaseStepConfig):
     loss: str = "mean_squared_error"
 
 
-@step(enable_cache=False)
+@step
 def lstm_trainer(
     config: LSTMConfig,  # not an artifact; used for quickly changing params in runs
     X_train: np.ndarray,

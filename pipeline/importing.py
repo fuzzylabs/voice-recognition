@@ -1,5 +1,4 @@
 import os
-
 from zenml.steps import Output, step
 import numpy as np
 import librosa
@@ -10,7 +9,7 @@ def get_words() -> Output(
     words=np.ndarray
 ):
     """Returns paths to folders with example data for each word"""
-    return np.array(["../audio/hello", "../audio/goodbye"])
+    return np.array(["audio/hello", "audio/goodbye"])
 
 
 def spectrogram_from_file(file_path, max_freq=10000):
@@ -31,6 +30,9 @@ def spectrogram_producer(
 ) -> Output(
     X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray, timesteps=int
 ):
+    #while True:
+    #    pass
+
     """Loads the wav files as spectrograms and split them into training and testing split"""
     X = []
     y = []
