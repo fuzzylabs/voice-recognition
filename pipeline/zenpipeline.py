@@ -17,6 +17,7 @@ def load_spectrogram_pipeline(
 
 @pipeline(
     required_integrations=[TENSORFLOW],
+    requirements_file="pipeline-requirements.txt"
 )
 def train_and_evaluate_pipeline(
     get_words,
