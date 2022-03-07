@@ -1,0 +1,6 @@
+custom_docker_base_image_name: null
+kubeflow_pipelines_ui_port: 8080
+kubernetes_context: null
+name: kubeflow_orchestrator
+synchronous: false
+uuid: 8ae94085-94cd-41b4-b698-abca73569710
