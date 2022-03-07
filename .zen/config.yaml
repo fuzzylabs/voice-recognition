@@ -1,4 +1,4 @@
-active_stack_name: local_kubeflow_stack
+active_stack_name: local_stack
 stack_components:
   artifact_store:
     local_artifact_store: local
