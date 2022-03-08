@@ -2,8 +2,7 @@ from zenml.integrations.constants import TENSORFLOW
 from zenml.pipelines import pipeline
 
 from evaluating import keras_evaluator
-# from importing import get_words, load_spectrograms_from_audio
-from importing import load_spectrogram_from_file
+from importing import get_words, load_spectrograms_from_audio, load_spectrogram_from_file
 from training import lstm_trainer, LSTMConfig
 
 
@@ -46,8 +45,9 @@ def train_and_evaluate_preloaded_spectrogram_pipeline(
     keras_evaluator(X_test=X_test, y_test=y_test, model=model)
 
 
-pipeline = train_and_evaluate_preloaded_spectrogram_pipeline(
-    spectrogram_producer=load_spectrogram_from_file(),
+pipeline = train_and_evaluate_pipeline(
+    get_words=get_words(),
+    spectrogram_producer=load_spectrograms_from_audio(),
     lstm_trainer=lstm_trainer(config=LSTMConfig()),
     keras_evaluator=keras_evaluator()
 )

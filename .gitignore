@@ -6,3 +6,6 @@
 **/.zen
 **/env/
 **/__pycache__
+/pipeline/venv/
+/pipeline/audio/
+/spectrograms/venv/
