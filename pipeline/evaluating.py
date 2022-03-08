@@ -3,8 +3,11 @@ import numpy as np
 import tensorflow as tf
 
 from zenml.steps import step, Output
+from zenml.integrations.mlflow.mlflow_step_decorator import enable_mlflow
 
 
+# N.b: The order of decorators is important here
+@enable_mlflow
 @step
 def keras_evaluator(
     X_test: np.ndarray,

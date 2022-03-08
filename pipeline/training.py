@@ -2,6 +2,7 @@
 import numpy as np
 
 from zenml.steps import step, BaseStepConfig
+from zenml.integrations.mlflow.mlflow_step_decorator import enable_mlflow
 
 from keras.models import Sequential, Model
 from keras.layers import Dense, LSTM, Dropout
@@ -15,6 +16,8 @@ class LSTMConfig(BaseStepConfig):
     loss: str = "mean_squared_error"
 
 
+# N.b: The order of decorators is important here
+@enable_mlflow
 @step
 def lstm_trainer(
     config: LSTMConfig,  # not an artifact; used for quickly changing params in runs
