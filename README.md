@@ -10,7 +10,7 @@ internet, I want to be able to see, tweak and learn from every line of code that
 
 Secondly, security, to achieve all the functionality I want for my assistant I want to be able to pay for things,
 access my accounts on streaming services like Spotify or Netflix and even lock and unlock my front door. I want to 
-fundamentally bake into the system that only the people I choose that can do these things.
+fundamentally bake into the system that only the people I choose can do these things.
 
 ####So how do we achieve this?
 This project is a completely open source mlops pipeline that lets you create a voice recognition model, based on training
@@ -26,12 +26,28 @@ TODO: This should be updated over time as the project is fleshed out
 - Model deployment
 
 # Usage
-Enter the virtual environment with `pipenv shell`
-Install dependencies with `pipenv install`
+Setup the virtual environment with
+```shell
+cd pipeline
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+zenml integration install tensorflow
+```
 
-Download data with `dvc pull`, if you want to push to dvc you need to authenticate:
+Download data with `dvc pull -r origin`, if you want to push to dvc you need to authenticate:
 ```shell
 dvc remote modify origin --local auth basic
 dvc remote modify origin --local user <DagsHub-user-name>
 dvc remote modify origin --local password <Token>
+```
+
+To run the ZenML pipeline the following in the `pipeline` directory:
+```shell
+python zenpipeline.py
+```
+
+Now running the following will return a summary and an accuracy for the last pipeline that was run
+```shell
+python inspector.py
 ```
