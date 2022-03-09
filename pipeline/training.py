@@ -1,7 +1,8 @@
 
 import numpy as np
+import pandas as pd
 
-from zenml.steps import step, BaseStepConfig
+from zenml.steps import step, Output, BaseStepConfig
 
 from keras.models import Sequential, Model
 from keras.layers import Dense, LSTM, Dropout
@@ -21,7 +22,9 @@ def lstm_trainer(
     X_train: np.ndarray,
     y_train: np.ndarray,
     timesteps: int,
-) -> Model:
+) -> Output(
+    model=Model, losses=np.ndarray, accuracies=np.ndarray
+):
     """Train a LSTM to tell the difference between hello and goodbye spectrograms"""
     model = Sequential()
 
@@ -32,6 +35,6 @@ def lstm_trainer(
 
     model.compile(optimizer=config.optimizer, loss=config.loss, metrics=["accuracy"])
 
-    model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size)
+    history = model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size)
 
-    return model
+    return model, np.array(history.history["loss"]), np.array(history.history["accuracy"])
