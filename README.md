@@ -51,3 +51,28 @@ Now running the following will return a summary and an accuracy for the last pip
 ```shell
 python inspector.py
 ```
+
+## Kubeflow
+The Kubeflow integration requires [K3D](https://k3d.io/v5.2.1/#installation) and [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
+to be installed before it will function correctly.
+
+To install the Kubeflow integration run:
+```shell
+zenml integration install kubeflow
+```
+
+To run the pipeline with Kubeflow enabled:
+```shell
+docker build . -t my_custom_zen_image
+zenml stack set local_kubeflow_stack
+zenml stack up
+```
+This will display a link to access your local kubeflow dashboard, if you perform a run with `python zenpipeline.py`
+you can see the pipeline in kubeflow.
+
+Once you're done run `zenml stack down` to clear down the kubernetes clusters.
+It has happened before that the cluster is not cleared down correctly, if that is the case you can use k3d to clear the cluster(s)
+```shell
+k3d cluster list
+k3d cluster delete <name>
+```
