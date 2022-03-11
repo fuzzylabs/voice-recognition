@@ -13,10 +13,10 @@ can trigger commands. This is achieved by specifying training data that is uniqu
 benefits. I can now pay for things, access my accounts on streaming services like Spotify or Netflix and even lock and
 unlock my front door, knowing that my device can only be operated by me.
 
-####So how do we achieve this?
+#### So how do we achieve this?
 This project is a completely open source mlops pipeline that lets you create a voice recognition model, based on training
 data of your own voice. For example to get the model to recognise `hello` and `goodbye` you record yourself saying those
-words ~100 times and label them, then feed them into the training of our model.
+words ~30 times and label them, then feed them into the training of our model.
 
 The project will produce a model that will label similar audio files and can be deployed on the edge.
 
