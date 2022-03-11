@@ -9,3 +9,6 @@
 /pipeline/venv/
 /pipeline/audio/
 /spectrograms/venv/
+/.zen/
+/old_zen/
+/notebooks/venv/
