@@ -1,4 +1,5 @@
-# Voice Recognition
+# Open Source Voice Assistants
+### closed-circuit, super-visible, completely personalised
 
 ![Scotty from Star Trek tries to use a mouse as if you can speak into it](Scotty_uses_a_mouse.jpg)
 
