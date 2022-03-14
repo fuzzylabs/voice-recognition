@@ -62,11 +62,6 @@ Now running the following will return a summary and an accuracy for the last pip
 python inspector.py
 ```
 
-To swap to a different branch, first switch to that branch in git, e.g.:
-`git checkout master`
-Then checkout the data with dvc:
-`dvc checkout`
-
 #### Making changes to the dataset
 To make changes to the dataset: first, authenticate:
 ```shell
@@ -83,6 +78,12 @@ git commit -m"Updated the dataset"
 dvc push -r origin
 git push
 ```
+
+## Swapping to a different branch
+To swap to a different branch, first switch to that branch in git, e.g.:
+`git checkout master`
+Then checkout the data with dvc:
+`dvc checkout`
 
 ## Setup Kubeflow
 
