@@ -2,3 +2,13 @@
 */.ipynb_checkpoints/*
 .idea/
 /audio
+*~
+**/.zen
+**/env/
+**/__pycache__
+/pipeline/venv/
+/pipeline/audio/
+/spectrograms/venv/
+/.zen/
+/old_zen/
+/notebooks/venv/

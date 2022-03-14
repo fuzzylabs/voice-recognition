@@ -7,9 +7,11 @@ name = "pypi"
 notebook = "*"
 keras = "*"
 tensorflow = "*"
-numba = "==0.53"
+numba = "*"
+zenml = "*"
+librosa = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.8.10"
 
 [dev-packages]
