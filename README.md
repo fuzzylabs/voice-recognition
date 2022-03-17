@@ -52,7 +52,7 @@ N.b. To get the latest version of the dataset `dvc pull -r origin` should be run
 
 To run the ZenML pipeline run the following in the `pipeline` directory:
 ```shell
-python zenpipeline.py
+python run.py
 ```
 This runs the pipeline, which trains the model and stores the artifacts from the pipeline in the local store.
 

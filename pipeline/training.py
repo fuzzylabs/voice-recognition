@@ -1,10 +1,12 @@
+import os
 
 import numpy as np
 
-from zenml.steps import step, BaseStepConfig
+from zenml.steps import step, BaseStepConfig, StepContext
 
 from keras.models import Sequential, Model
 from keras.layers import Dense, LSTM, Dropout
+from keras.callbacks import TensorBoard
 
 
 class LSTMConfig(BaseStepConfig):
@@ -15,11 +17,12 @@ class LSTMConfig(BaseStepConfig):
     loss: str = "mean_squared_error"
 
 
-@step
+@step(enable_cache=True)
 def lstm_trainer(
     config: LSTMConfig,  # not an artifact; used for quickly changing params in runs
     X_train: np.ndarray,
     y_train: np.ndarray,
+    context: StepContext,
     timesteps: int,
 ) -> Model:
     """Train a LSTM to tell the difference between hello and goodbye spectrograms"""
@@ -32,6 +35,11 @@ def lstm_trainer(
 
     model.compile(optimizer=config.optimizer, loss=config.loss, metrics=["accuracy"])
 
-    model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size)
+    log_dir = os.path.join(context.get_output_artifact_uri(), "logs")
+    tensorboard_callback = TensorBoard(
+        log_dir=log_dir, histogram_freq=1
+    )
+
+    model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size, callbacks=[tensorboard_callback])
 
     return model
