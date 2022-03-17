@@ -123,6 +123,8 @@ zenml stack up
 This will display a link to access your local kubeflow dashboard, if you perform a run with `python zenpipeline.py`
 you can see the pipeline in kubeflow.
 
+Set `custom_docker_base_image_name` in .zen/orchestrators/kubeflow_orchestrator.yaml to `base_zenml_image`
+
 Once you're done run `zenml stack down` to clear down the kubernetes clusters.
 It has happened before that the cluster is not cleared down correctly, if that is the case you can use k3d to clear the cluster(s)
 ```shell
