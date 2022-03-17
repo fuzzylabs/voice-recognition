@@ -1,3 +1,4 @@
-zenml
+zenml==0.6.3
 dvc
 librosa
+numpy==1.21
