@@ -1,6 +1,8 @@
 import os
 
 import numpy as np
+import mlflow
+from zenml.integrations.mlflow.mlflow_step_decorator import enable_mlflow
 
 from zenml.steps import step, BaseStepConfig, StepContext
 
@@ -17,6 +19,8 @@ class LSTMConfig(BaseStepConfig):
     loss: str = "mean_squared_error"
 
 
+# Define the step and enable MLflow (n.b. order of decorators is important here)
+@enable_mlflow
 @step(enable_cache=True)
 def lstm_trainer(
     config: LSTMConfig,  # not an artifact; used for quickly changing params in runs
@@ -40,6 +44,7 @@ def lstm_trainer(
         log_dir=log_dir, histogram_freq=1
     )
 
+    mlflow.tensorflow.autolog()
     model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size, callbacks=[tensorboard_callback])
 
     return model

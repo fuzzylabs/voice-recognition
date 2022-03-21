@@ -56,6 +56,16 @@ python run.py
 ```
 This runs the pipeline, which trains the model and stores the artifacts from the pipeline in the local store.
 
+It also starts a [TensorBoard](https://www.tensorflow.org/tensorboard/) server, which can be accessed at `localhost:5000`
+and needs to be closed after usage with `python run.py --stop-tensorboard`
+
+You also get a REST API which takes a spectrogram numpy array like so:
+[comment]: <> (TODO: Add a curl example for querying the REST API)
+The MLFlow REST API is closed by running `python run.py --stop-service`.
+
+An MLFlow interface can now also be started with `mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/acaf101b-cb92-4b27-b107-76956f21e4cb/mlruns -p 4040`
+and visited on `localhost:4000`. See more info on this [further down the page](#mlflow-experiment-tracking).
+
 
 Now running the following will return a summary and an accuracy for the last pipeline that was run
 ```shell
@@ -131,3 +141,13 @@ It has happened before that the cluster is not cleared down correctly, if that i
 k3d cluster list
 k3d cluster delete <name>
 ```
+
+# MLFlow experiment tracking
+After running `python run.py` MLFlow UI can be loaded by running
+`mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/acaf101b-cb92-4b27-b107-76956f21e4cb/mlruns -p 4040`
+and visiting `localhost:4040`.
+The port variable is set here so as not to conflict with the tensorboard UI which is hosted on port 5000, which MLFlow takes as default.
+
+Running `python run.py` also starts a REST API which takes a spectrogram numpy array like so:
+[comment]: <> (TODO: Add a curl example for querying the REST API)
+The MLFlow REST API is closed by running `python run.py --stop-service`.
