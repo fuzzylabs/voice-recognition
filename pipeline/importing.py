@@ -1,8 +1,12 @@
+import io
 import os
-from zenml.steps import Output, step
+
+import soundfile
+from zenml.steps import Output, step, BaseStepConfig
 import numpy as np
 import librosa
 from sklearn.model_selection import train_test_split
+
 
 @step
 def get_words() -> Output(
@@ -12,10 +16,24 @@ def get_words() -> Output(
     return np.array(["audio/hello", "audio/goodbye"])
 
 
-def spectrogram_from_file(file_path, max_freq=10000):
-    samples, sampling_rate = librosa.load(file_path, sr=None, mono=True, offset=0.0, duration=None)
+def spectrogram_from_samples(samples):
     X = librosa.stft(samples)
     return librosa.amplitude_to_db(abs(X))
+
+
+def wav_bytes_to_spectrogram(input_bytes: bytes, timesteps=None):
+    samples, _ = librosa.load(soundfile.SoundFile(io.BytesIO(input_bytes)))
+    return prep_spectrogram(spectrogram_from_samples(samples), timesteps)
+
+
+def wav_path_to_bytes(path: str) -> bytes:
+    with open(path, "rb") as f:
+        return f.read()
+
+
+def spectrogram_from_file(file_path):
+    samples, _ = librosa.load(file_path, sr=None, mono=True, offset=0.0, duration=None)
+    return spectrogram_from_samples(samples)
 
 
 def spectrograms_from_folder(folder_path, tag):
@@ -24,9 +42,22 @@ def spectrograms_from_folder(folder_path, tag):
     return X, y
 
 
+def prep_spectrogram(spectrogram: np.array, new_timesteps: int = None) -> np.array:
+    # Pad the values of X with 0s up to the given time steps
+    if new_timesteps is None:
+        return spectrogram
+    return np.pad(spectrogram, [(0, 0), (0, new_timesteps - spectrogram.shape[1])], constant_values=(0,)).T
+
+
+class LoadSpectrogramConfig(BaseStepConfig):
+    # N.B. Timesteps must be more than the maximum X value of the desired inputs
+    max_timesteps: int = None
+
+
 @step
 def load_spectrograms_from_audio(
-        words: np.ndarray
+    words: np.ndarray,
+    config: LoadSpectrogramConfig
 ) -> Output(
     X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray, timesteps=int
 ):
@@ -38,15 +69,20 @@ def load_spectrograms_from_audio(
         X += folder_X
         y += folder_y
 
-    maximum_X = max([i.shape[1] for i in X])
-    # Pad the values of X with 0s upto the maximum time steps and transpose the matrix
-    X = [np.pad(i, [(0, 0), (0, maximum_X - i.shape[1])], constant_values=(0,)).T for i in X]
+    if config.max_timesteps is None:
+        maximum_X = max([i.shape[1] for i in X])
+    else:
+        maximum_X = config.max_timesteps
+
+    # Pad the values of X with 0s up to the maximum time steps and transpose the matrix
+    X = [prep_spectrogram(i, maximum_X) for i in X]
 
     X, y = np.array(X), np.array(y)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
 
     return X_train, X_test, y_train, y_test, maximum_X
+
 
 @step
 def load_spectrogram_from_file() -> Output(
