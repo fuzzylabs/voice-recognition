@@ -1,4 +1,4 @@
-
+import mlflow
 import numpy as np
 import tensorflow as tf
 from zenml.integrations.mlflow.mlflow_step_decorator import enable_mlflow
@@ -16,4 +16,6 @@ def keras_evaluator(
     loss=float, accuracy=float
 ):
     """Calculate the loss for the model on the test set"""
-    return model.evaluate(X_test, y_test, verbose=2)
+    accuracy, loss = model.evaluate(X_test, y_test, verbose=2)
+    mlflow.log_metric("Testing Accuracy", accuracy)
+    return accuracy, loss
