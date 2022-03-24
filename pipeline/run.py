@@ -3,7 +3,7 @@ from zenml.integrations.mlflow.mlflow_environment import MLFLOW_ENVIRONMENT_NAME
 from zenml.integrations.mlflow.steps import MLFlowDeployerConfig
 
 from evaluating import keras_evaluator
-from importing import get_words, load_spectrograms_from_audio
+from importing import get_words, load_spectrograms_from_audio, LoadSpectrogramConfig
 from deployment import inference_pipeline, prediction_service_loader, MLFlowDeploymentLoaderStepConfig, \
     predictor, deployment_trigger, DeploymentTriggerConfig, model_deployer
 from training import LSTMConfig, lstm_trainer
@@ -38,7 +38,7 @@ from zenml.integrations.tensorflow.visualizers import (
 def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     if stop_tensorboard:
         stop_tensorboard_server(
-            pipeline_name="train_and_evaluate_pipeline",
+            pipeline_name="train_evaluate_and_deploy_pipeline",
             step_name="lstm_trainer",
         )
 
@@ -56,9 +56,9 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
 
     deployment = train_evaluate_and_deploy_pipeline(
         get_words=get_words(),
-        spectrogram_producer=load_spectrograms_from_audio(),
+        spectrogram_producer=load_spectrograms_from_audio(config=LoadSpectrogramConfig(max_timesteps=200)),
         lstm_trainer=lstm_trainer(config=LSTMConfig(
-            epochs=60,
+            epochs=2,
             batch_size=10,
             optimizer="adam",
             loss="mean_squared_error",

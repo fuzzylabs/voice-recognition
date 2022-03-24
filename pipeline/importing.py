@@ -1,5 +1,5 @@
 import os
-from zenml.steps import Output, step
+from zenml.steps import Output, step, BaseStepConfig
 import numpy as np
 import librosa
 from sklearn.model_selection import train_test_split
@@ -12,7 +12,14 @@ def get_words() -> Output(
     return np.array(["audio/hello", "audio/goodbye"])
 
 
-def spectrogram_from_file(file_path, max_freq=10000):
+def prep_spectrogram(spectrogram: np.array, new_timesteps: int = None) -> np.array:
+    # Pad the values of X with 0s up to the given time steps
+    if new_timesteps is None:
+        return spectrogram
+    return np.pad(spectrogram, [(0, 0), (0, new_timesteps - spectrogram.shape[1])], constant_values=(0,)).T
+
+
+def spectrogram_from_file(file_path):
     samples, sampling_rate = librosa.load(file_path, sr=None, mono=True, offset=0.0, duration=None)
     X = librosa.stft(samples)
     return librosa.amplitude_to_db(abs(X))
@@ -24,9 +31,14 @@ def spectrograms_from_folder(folder_path, tag):
     return X, y
 
 
+class LoadSpectrogramConfig(BaseStepConfig):
+    # N.B. Timesteps must be more than the maximum X value of the desired inputs
+    max_timesteps: int = None
+
 @step
 def load_spectrograms_from_audio(
-        words: np.ndarray
+    words: np.ndarray,
+    config: LoadSpectrogramConfig
 ) -> Output(
     X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray, timesteps=int
 ):
@@ -38,9 +50,13 @@ def load_spectrograms_from_audio(
         X += folder_X
         y += folder_y
 
-    maximum_X = max([i.shape[1] for i in X])
+    if config.max_timesteps is None:
+        maximum_X = max([i.shape[1] for i in X])
+    else:
+        maximum_X = config.max_timesteps
+
     # Pad the values of X with 0s upto the maximum time steps and transpose the matrix
-    X = [np.pad(i, [(0, 0), (0, maximum_X - i.shape[1])], constant_values=(0,)).T for i in X]
+    X = [prep_spectrogram(i, maximum_X) for i in X]
 
     X, y = np.array(X), np.array(y)
 
