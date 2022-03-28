@@ -3,11 +3,12 @@ from zenml.integrations.mlflow.mlflow_environment import MLFLOW_ENVIRONMENT_NAME
 from zenml.integrations.mlflow.steps import MLFlowDeployerConfig
 
 from evaluating import keras_evaluator
-from importing import get_words, load_spectrograms_from_audio, LoadSpectrogramConfig
+from importing import get_words, load_spectrograms_from_audio, LoadSpectrogramConfig, get_paths_by_file, \
+    dvc_load_spectrograms
 from deployment import inference_pipeline, prediction_service_loader, MLFlowDeploymentLoaderStepConfig, \
     predictor, deployment_trigger, DeploymentTriggerConfig, model_deployer
 from training import LSTMConfig, lstm_trainer
-from zenpipeline import train_evaluate_and_deploy_pipeline
+from zenpipeline import train_evaluate_and_deploy_pipeline, dvc_train_evaluate_and_deploy_pipeline
 from zenml.services import load_last_service_from_step
 from zenml.environment import Environment
 
@@ -15,6 +16,28 @@ from zenml.integrations.tensorflow.visualizers import (
     visualize_tensorboard,
     stop_tensorboard_server,
 )
+
+
+def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
+    deployment = dvc_train_evaluate_and_deploy_pipeline(
+        get_paths_by_file=get_paths_by_file(),
+        dvc_load_spectrograms=dvc_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
+        lstm_trainer=lstm_trainer(config=LSTMConfig(
+            epochs=epochs,
+            batch_size=batch_size,
+            optimizer=optimizer,
+            loss=loss,
+        )),
+        keras_evaluator=keras_evaluator(),
+        deployment_trigger=deployment_trigger(
+            config=DeploymentTriggerConfig(
+                min_accuracy=1.0,
+            )
+        ),
+        model_deployer=model_deployer(config=MLFlowDeployerConfig(workers=3)),
+    )
+
+    deployment.run()
 
 
 @click.command()
@@ -54,31 +77,6 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     if stop_tensorboard or stop_service:
         return
 
-    deployment = train_evaluate_and_deploy_pipeline(
-        get_words=get_words(),
-        spectrogram_producer=load_spectrograms_from_audio(config=LoadSpectrogramConfig(max_timesteps=200)),
-        lstm_trainer=lstm_trainer(config=LSTMConfig(
-            epochs=2,
-            batch_size=10,
-            optimizer="adam",
-            loss="mean_squared_error",
-        )),
-        keras_evaluator=keras_evaluator(),
-        deployment_trigger=deployment_trigger(
-            config=DeploymentTriggerConfig(
-                min_accuracy=min_accuracy,
-            )
-        ),
-        model_deployer=model_deployer(config=MLFlowDeployerConfig(workers=3)),
-    )
-
-    deployment.run()
-
-    # visualize_tensorboard(
-    #     pipeline_name="train_evaluate_and_deploy_pipeline",
-    #     step_name="lstm_trainer",
-    # )
-    #
     # # Initialize an inference pipeline run
     # inference = inference_pipeline(
     #     get_words=get_words(),
@@ -94,6 +92,8 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     #
     # inference.run()
 
+    run_pipeline(epochs=3, batch_size=10, optimizer="adam", loss="mean_squared_error")
+
     mlflow_env = Environment()[MLFLOW_ENVIRONMENT_NAME]
     print(
         "You can run:\n "
@@ -104,7 +104,7 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     )
 
     service = load_last_service_from_step(
-        pipeline_name="train_evaluate_and_deploy_pipeline",
+        pipeline_name="dvc_train_evaluate_and_deploy_pipeline",
         step_name="model_deployer",
         running=True,
     )
