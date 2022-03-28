@@ -33,16 +33,17 @@ instructions on acquiring and contributing to the dataset.
 # Usage
 ### Setup virtual environment
 ```shell
-cd pipeline
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r pipeline/requirements.txt
 ```
 
 ### Setup ZenML
 ```shell
+cd pipeline
 zenml init
 zenml integration install tensorflow
+zenml integration install mlflow
 ```
 
 ### Setup DVC
@@ -58,8 +59,8 @@ python run.py
 ```
 This runs the pipeline, which trains the model and stores the artifacts from the pipeline in the local store.
 
-It also starts a [TensorBoard](https://www.tensorflow.org/tensorboard/) server, which can be accessed at `localhost:5000`
-and needs to be closed after usage with `python run.py --stop-tensorboard`
+There are flags for specifying specific training hyperparameters, for example:
+`python run.py --epochs 2 --batch_size 5 --optimizer adadelta --loss mean_absolute_error`
 
 You also get a REST API which takes a spectrogram numpy array.
 [httprequest.py](../httprequest.py) is an example request, which encodes an audio file and classifies it using the API.
@@ -145,11 +146,11 @@ k3d cluster delete <name>
 ```
 
 # MLFlow experiment tracking
-After running `python run.py` MLFlow UI can be loaded by running
-`mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/acaf101b-cb92-4b27-b107-76956f21e4cb/mlruns -p 4040`
-and visiting `localhost:4040`.
-The port variable is set here so as not to conflict with the tensorboard UI which is hosted on port 5000, which MLFlow takes as default.
+After running `python run.py` MLFlow UI can be loaded by running the command printed in green after `run.py` has 
+finished it looks like this:
+`mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/<unique store id>/mlruns`
+After running that visit `localhost:4040` to see the experiment tracker.
 
-Running `python run.py` also starts a REST API which takes a spectrogram numpy array like so:
-[comment]: <> (TODO: Add a curl example for querying the REST API)
-The MLFlow REST API is closed by running `python run.py --stop-service`.
+Running `python run.py` also starts a REST API which takes a spectrogram numpy array. See
+[httprequest.py](httprequest.py) for an example request.
+The REST API is closed by running `python run.py --stop-service`.

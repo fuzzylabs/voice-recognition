@@ -59,7 +59,6 @@ def spectrogram_from_dvc(file_path):
         path=file_path,
         repo='https://github.com/fuzzylabs/voice-recognition.git',
         remote="origin",
-        rev="dynamic-importing",
         mode="rb",
     )
     return wav_bytes_to_spectrogram(wav_bytes)

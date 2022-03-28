@@ -3,17 +3,14 @@ from zenml.integrations.mlflow.mlflow_environment import MLFLOW_ENVIRONMENT_NAME
 from zenml.integrations.mlflow.steps import MLFlowDeployerConfig
 
 from evaluating import keras_evaluator
-from importing import get_words, load_spectrograms_from_audio, LoadSpectrogramConfig, get_paths_by_file, \
-    dvc_load_spectrograms
-from deployment import inference_pipeline, prediction_service_loader, MLFlowDeploymentLoaderStepConfig, \
-    predictor, deployment_trigger, DeploymentTriggerConfig, model_deployer
+from importing import LoadSpectrogramConfig, get_paths_by_file, dvc_load_spectrograms
+from deployment import deployment_trigger, DeploymentTriggerConfig, model_deployer
 from training import LSTMConfig, lstm_trainer
-from zenpipeline import train_evaluate_and_deploy_pipeline, dvc_train_evaluate_and_deploy_pipeline
+from zenpipeline import dvc_train_evaluate_and_deploy_pipeline
 from zenml.services import load_last_service_from_step
 from zenml.environment import Environment
 
 from zenml.integrations.tensorflow.visualizers import (
-    visualize_tensorboard,
     stop_tensorboard_server,
 )
 
@@ -41,6 +38,10 @@ def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
 
 
 @click.command()
+@click.option("--epochs", default=50, help="Number of epochs for training")
+@click.option("--batch_size", default=10, help="Batch size for training")
+@click.option("--optimizer", default="adam", help="optimizer for training")
+@click.option("--loss", default="mean_squared_error", help="loss function for training")
 @click.option(
     "--stop-tensorboard",
     is_flag=True,
@@ -58,16 +59,10 @@ def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
     default=0.00,
     help="Minimum accuracy required to deploy the model",
 )
-def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
-    if stop_tensorboard:
-        stop_tensorboard_server(
-            pipeline_name="train_evaluate_and_deploy_pipeline",
-            step_name="lstm_trainer",
-        )
-
+def main(epochs: int, batch_size: int, optimizer: str, loss: str, stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     if stop_service:
         service = load_last_service_from_step(
-            pipeline_name="train_evaluate_and_deploy_pipeline",
+            pipeline_name="dvc_train_evaluate_and_deploy_pipeline",
             step_name="model_deployer",
             running=True,
         )
@@ -77,22 +72,7 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     if stop_tensorboard or stop_service:
         return
 
-    # # Initialize an inference pipeline run
-    # inference = inference_pipeline(
-    #     get_words=get_words(),
-    #     spectrogram_producer=load_spectrograms_from_audio(),
-    #     prediction_service_loader=prediction_service_loader(
-    #         MLFlowDeploymentLoaderStepConfig(
-    #             pipeline_name="train_evaluate_and_deploy_pipeline",
-    #             step_name="model_deployer",
-    #         )
-    #     ),
-    #     predictor=predictor(),
-    # )
-    #
-    # inference.run()
-
-    run_pipeline(epochs=3, batch_size=10, optimizer="adam", loss="mean_squared_error")
+    run_pipeline(epochs=epochs, batch_size=batch_size, optimizer=optimizer, loss=loss)
 
     mlflow_env = Environment()[MLFLOW_ENVIRONMENT_NAME]
     print(

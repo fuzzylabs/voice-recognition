@@ -39,12 +39,7 @@ def lstm_trainer(
 
     model.compile(optimizer=config.optimizer, loss=config.loss, metrics=["accuracy"])
 
-    log_dir = os.path.join(context.get_output_artifact_uri(), "logs")
-    tensorboard_callback = TensorBoard(
-        log_dir=log_dir, histogram_freq=1
-    )
-
     mlflow.tensorflow.autolog()
-    model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size, callbacks=[tensorboard_callback])
+    model.fit(X_train, y_train, epochs=config.epochs, batch_size=config.batch_size)
 
     return model

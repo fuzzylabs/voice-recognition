@@ -1,7 +1,7 @@
 import base64
 
 import requests
-from importing import spectrogram_from_file, prep_spectrogram
+from pipeline.importing import spectrogram_from_file, prep_spectrogram
 
 response = requests.post(
     "http://localhost:8000/invocations",
