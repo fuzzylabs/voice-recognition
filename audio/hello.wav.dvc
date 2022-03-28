@@ -1,0 +1,4 @@
+outs:
+- md5: cfd120686ee27151026a861539c81f1e
+  size: 227372
+  path: hello.wav

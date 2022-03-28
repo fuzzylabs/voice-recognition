@@ -9,3 +9,4 @@ response = requests.post(
 )
 
 print(response.json())
+print(["Hello" if float(i[0]) < 0.5 else "Goodbye" for i in response.json()])

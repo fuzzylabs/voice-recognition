@@ -1,7 +1,6 @@
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 .idea/
-/audio
 *~
 **/.zen
 **/env/

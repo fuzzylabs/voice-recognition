@@ -19,7 +19,9 @@ def keras_evaluator(
     loss=float, accuracy=float
 ):
     """Calculate the loss for the model on the test set"""
-    return model.evaluate(X_test, y_test, verbose=2)
+    accuracy, loss = model.evaluate(X_test, y_test, verbose=2)
+    mlflow.log_metric("Testing Accuracy", accuracy)
+    return accuracy, loss
 
 
 @enable_mlflow
@@ -34,4 +36,5 @@ def audio_classifier_evaluator(
     """Calculate the loss for the model on the test set"""
     mlflow.tensorflow.autolog()
     loss, accuracy = model.model.evaluate(X_test, y_test, verbose=2)
+    mlflow.log_metric("Testing Accuracy", accuracy)
     return loss, accuracy

@@ -50,6 +50,8 @@ Download the audio dataset with `dvc pull -r origin`.
 
 N.b. To get the latest version of the dataset `dvc pull -r origin` should be run whenever you change branch.
 
+### Running the pipeline locally
+
 To run the ZenML pipeline run the following in the `pipeline` directory:
 ```shell
 python run.py
@@ -59,8 +61,8 @@ This runs the pipeline, which trains the model and stores the artifacts from the
 It also starts a [TensorBoard](https://www.tensorflow.org/tensorboard/) server, which can be accessed at `localhost:5000`
 and needs to be closed after usage with `python run.py --stop-tensorboard`
 
-You also get a REST API which takes a spectrogram numpy array like so:
-[comment]: <> (TODO: Add a curl example for querying the REST API)
+You also get a REST API which takes a spectrogram numpy array.
+[httprequest.py](../httprequest.py) is an example request, which encodes an audio file and classifies it using the API.
 The MLFlow REST API is closed by running `python run.py --stop-service`.
 
 An MLFlow interface can now also be started with `mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/acaf101b-cb92-4b27-b107-76956f21e4cb/mlruns -p 4040`

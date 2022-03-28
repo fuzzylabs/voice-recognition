@@ -1,0 +1,4 @@
+outs:
+- md5: b5feb33aabe54471244bdd1e062ed82d
+  size: 121748
+  path: hello_shortened.wav
