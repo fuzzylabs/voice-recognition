@@ -98,6 +98,18 @@ To swap to a different branch, first switch to that branch in git, e.g.:
 Then checkout the data with dvc:
 `dvc checkout`
 
+# MLFlow experiment tracking
+After running `python run.py` the MLFlow tracking UI can be loaded by running the command printed in green after `run.py` has 
+finished, it looks like this:
+
+`mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/<unique_store_id>/mlruns`
+
+After running that visit `localhost:4040` to see the experiment tracker.
+
+The tracking UI displays the parameters, artifacts and evaluation metrics recorded by each run, these can be
+graphed and compared in a myriad of ways, see the [MLFlow documentation](https://mlflow.org/docs/latest/tracking.html#tracking-ui)
+for more information.
+
 ## Setup Kubeflow
 
 Note: ZenML's Kubeflow integration is still experimental and as a result the steps to make this work are a bit cumbersome
@@ -144,13 +156,3 @@ It has happened before that the cluster is not cleared down correctly, if that i
 k3d cluster list
 k3d cluster delete <name>
 ```
-
-# MLFlow experiment tracking
-After running `python run.py` MLFlow UI can be loaded by running the command printed in green after `run.py` has 
-finished it looks like this:
-`mlflow ui --backend-store-uri file:/home/ollie/.config/zenml/local_stores/<unique store id>/mlruns`
-After running that visit `localhost:4040` to see the experiment tracker.
-
-Running `python run.py` also starts a REST API which takes a spectrogram numpy array. See
-[httprequest.py](httprequest.py) for an example request.
-The REST API is closed by running `python run.py --stop-service`.
