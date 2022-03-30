@@ -1,4 +1,4 @@
 zenml==0.6.3
 dvc
+soundfile
 librosa
-numpy==1.21
