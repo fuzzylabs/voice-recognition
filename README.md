@@ -28,6 +28,8 @@ This project uses the following open source tools:
 * [DVC](https://dvc.org/) - The audio dataset is stored with DVC under a [DagsHub](https://dagshub.com/dashboard) remote
 [here](https://dagshub.com/fuzzylabs/voice-recognition), this syncs with the GitHub repository. See [usage](#usage) for
 instructions on acquiring and contributing to the dataset.
+* [MLFlow](https://mlflow.org/) - Is used by ZenML through an [integration](https://docs.zenml.io/features/integrations)
+it provides experiment tracking, see [here](#mlflow-experiment-tracking) for more information.
 
 
 # Usage
