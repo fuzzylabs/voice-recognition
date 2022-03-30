@@ -16,7 +16,7 @@ class LSTMConfig(BaseStepConfig):
     epochs: int = 50
     batch_size: int = 10
     optimizer: str = "adam"
-    loss: str = "mean_squared_error"
+    loss: str = "binary_crossentropy"
 
 
 # Define the step and enable MLflow (n.b. order of decorators is important here)
@@ -26,16 +26,21 @@ def lstm_trainer(
     config: LSTMConfig,  # not an artifact; used for quickly changing params in runs
     X_train: np.ndarray,
     y_train: np.ndarray,
-    context: StepContext,
     timesteps: int,
 ) -> Model:
     """Train a LSTM to tell the difference between hello and goodbye spectrograms"""
     model = Sequential()
 
-    model.add(LSTM(units=50, return_sequences=False, input_shape=(timesteps, 1025)))
+    model.add(LSTM(units=64, return_sequences=True, input_shape=(timesteps, 1025)))
     model.add(Dropout(0.2))
 
-    model.add(Dense(units=1, activation="sigmoid"))
+    model.add(LSTM(units=32, return_sequences=True))
+    model.add(Dropout(0.2))
+
+    model.add(LSTM(units=16, return_sequences=False))
+    model.add(Dropout(0.2))
+
+    model.add(Dense(units=2, activation="softmax"))
 
     model.compile(optimizer=config.optimizer, loss=config.loss, metrics=["accuracy"])
 
