@@ -60,11 +60,11 @@ def prep_spectrogram(spectrogram: np.array, new_timesteps: int = None) -> np.arr
 
 
 def spectrogram_from_dvc(file_path):
+    # dvc.api.read defaults to HEAD branch
     wav_bytes = dvc.api.read(
         path=file_path,
         repo='https://github.com/fuzzylabs/voice-recognition.git',
         remote="origin",
-        rev="dynamic-importing",
         mode="rb",
     )
     return wav_bytes_to_spectrogram(wav_bytes)
