@@ -18,7 +18,7 @@ from zenml.integrations.tensorflow.visualizers import (
 
 
 def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str, min_deployment_accuracy: float):
-    assert(1 >= min_deployment_accuracy >= 0, "min_deployment_accuracy must be between 0 and 1 inclusive")
+    assert 1 >= min_deployment_accuracy >= 0, "min_deployment_accuracy must be between 0 and 1 inclusive"
     deployment = dvc_train_evaluate_and_deploy_pipeline(
         get_paths_by_file=get_paths_by_file(),
         dvc_load_spectrograms=dvc_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
