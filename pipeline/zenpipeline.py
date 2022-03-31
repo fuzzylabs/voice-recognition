@@ -83,3 +83,27 @@ def dvc_train_evaluate_and_deploy_pipeline(
     loss, accuracy = keras_evaluator(X_test=X_test, y_test=y_test, model=model)
     deployment_decision = deployment_trigger(accuracy=accuracy)
     model_deployer(deployment_decision)
+
+
+@pipeline(
+    required_integrations=[TENSORFLOW, MLFLOW],
+    requirements_file="pipeline-requirements.txt",
+    enable_cache=True,
+)
+def preprocessing_pipeline(
+    get_paths_by_file,
+    dvc_load_spectrograms,
+    lstm_trainer,
+    attach_model_preprocessing,
+    keras_evaluator,
+    deployment_trigger,
+    model_deployer
+):
+    """Links the get_words and spectrogram_producer steps together in a pipeline"""
+    hello_words, goodbye_words = get_paths_by_file()
+    X_train, X_test, y_train, y_test, timesteps = dvc_load_spectrograms(hello_words=hello_words, goodbye_words=goodbye_words)
+    model = lstm_trainer(X_train=X_train, y_train=y_train, timesteps=timesteps)
+    model_path = attach_model_preprocessing(model=model)
+    loss, accuracy = keras_evaluator(X_test=X_test, y_test=y_test, model=model)
+    deployment_decision = deployment_trigger(accuracy=accuracy)
+    model_deployer(deployment_decision, path=model_path)

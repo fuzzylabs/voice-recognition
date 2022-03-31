@@ -6,8 +6,9 @@ from zenml.logger import set_root_verbosity
 from evaluating import keras_evaluator
 from importing import LoadSpectrogramConfig, get_paths_by_file, dvc_load_spectrograms
 from deployment import deployment_trigger, DeploymentTriggerConfig, model_deployer
-from training import LSTMConfig, lstm_trainer
-from zenpipeline import train_evaluate_and_deploy_pipeline, dvc_train_evaluate_and_deploy_pipeline
+from custom_mlflow_deployer import custom_mlflow_model_deployer
+from training import LSTMConfig, lstm_trainer, attach_model_preprocessing
+from zenpipeline import preprocessing_pipeline
 from zenml.services import load_last_service_from_step
 from zenml.environment import Environment
 
@@ -19,7 +20,7 @@ from zenml.integrations.tensorflow.visualizers import (
 
 def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str, min_deployment_accuracy: float):
     assert 1 >= min_deployment_accuracy >= 0, "min_deployment_accuracy must be between 0 and 1 inclusive"
-    deployment = dvc_train_evaluate_and_deploy_pipeline(
+    deployment = preprocessing_pipeline(
         get_paths_by_file=get_paths_by_file(),
         dvc_load_spectrograms=dvc_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
         lstm_trainer=lstm_trainer(config=LSTMConfig(
@@ -28,13 +29,14 @@ def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str, min_de
             optimizer=optimizer,
             loss=loss,
         )),
+        attach_model_preprocessing=attach_model_preprocessing(),
         keras_evaluator=keras_evaluator(),
         deployment_trigger=deployment_trigger(
             config=DeploymentTriggerConfig(
                 min_accuracy=min_deployment_accuracy,
             )
         ),
-        model_deployer=model_deployer(config=MLFlowDeployerConfig(workers=3)),
+        model_deployer=custom_mlflow_model_deployer(config=MLFlowDeployerConfig(workers=3)),
     )
 
     deployment.run()
@@ -78,21 +80,6 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
 
     if stop_tensorboard or stop_service:
         return
-
-    # # Initialize an inference pipeline run
-    # inference = inference_pipeline(
-    #     get_words=get_words(),
-    #     spectrogram_producer=load_spectrograms_from_audio(),
-    #     prediction_service_loader=prediction_service_loader(
-    #         MLFlowDeploymentLoaderStepConfig(
-    #             pipeline_name="train_evaluate_and_deploy_pipeline",
-    #             step_name="model_deployer",
-    #         )
-    #     ),
-    #     predictor=predictor(),
-    # )
-    #
-    # inference.run()
 
     run_pipeline(
         epochs=2,

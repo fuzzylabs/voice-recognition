@@ -6,9 +6,6 @@ from zenml.integrations.mlflow.mlflow_step_decorator import enable_mlflow
 from zenml.steps import step, Output
 
 # Define the step and enable MLflow (n.b. order of decorators is important here)
-from training import AudioClassifier
-
-
 @enable_mlflow
 @step
 def keras_evaluator(
@@ -20,21 +17,5 @@ def keras_evaluator(
 ):
     """Calculate the loss for the model on the test set"""
     accuracy, loss = model.evaluate(X_test, y_test, verbose=2)
-    mlflow.log_metric("Testing Accuracy", accuracy)
-    return accuracy, loss
-
-
-@enable_mlflow
-@step
-def audio_classifier_evaluator(
-    X_test: np.ndarray,
-    y_test: np.ndarray,
-    model: AudioClassifier,
-) -> Output(
-    loss=float, accuracy=float
-):
-    """Calculate the loss for the model on the test set"""
-    mlflow.tensorflow.autolog()
-    loss, accuracy = model.model.evaluate(X_test, y_test, verbose=2)
     mlflow.log_metric("Testing Accuracy", accuracy)
     return loss, accuracy
