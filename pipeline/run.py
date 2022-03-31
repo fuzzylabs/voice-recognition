@@ -5,7 +5,7 @@ from zenml.logger import set_root_verbosity
 
 from evaluating import keras_evaluator
 from importing import LoadSpectrogramConfig, get_paths_by_file, dvc_load_spectrograms
-from deployment import inference_pipeline, deployment_trigger, DeploymentTriggerConfig, model_deployer
+from deployment import deployment_trigger, DeploymentTriggerConfig, model_deployer
 from training import LSTMConfig, lstm_trainer
 from zenpipeline import train_evaluate_and_deploy_pipeline, dvc_train_evaluate_and_deploy_pipeline
 from zenml.services import load_last_service_from_step
@@ -17,7 +17,8 @@ from zenml.integrations.tensorflow.visualizers import (
 )
 
 
-def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
+def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str, min_deployment_accuracy: float):
+    assert(1 >= min_deployment_accuracy >= 0, "min_deployment_accuracy must be between 0 and 1 inclusive")
     deployment = dvc_train_evaluate_and_deploy_pipeline(
         get_paths_by_file=get_paths_by_file(),
         dvc_load_spectrograms=dvc_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
@@ -30,7 +31,7 @@ def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
         keras_evaluator=keras_evaluator(),
         deployment_trigger=deployment_trigger(
             config=DeploymentTriggerConfig(
-                min_accuracy=1.0,
+                min_accuracy=min_deployment_accuracy,
             )
         ),
         model_deployer=model_deployer(config=MLFlowDeployerConfig(workers=3)),
@@ -93,7 +94,13 @@ def main(stop_tensorboard: bool, min_accuracy: float, stop_service: bool):
     #
     # inference.run()
 
-    run_pipeline(epochs=3, batch_size=10, optimizer="adam", loss="mean_squared_error")
+    run_pipeline(
+        epochs=2,
+        batch_size=10,
+        optimizer="adam",
+        loss="mean_squared_error",
+        min_deployment_accuracy=min_accuracy
+    )
 
     mlflow_env = Environment()[MLFLOW_ENVIRONMENT_NAME]
     print(
