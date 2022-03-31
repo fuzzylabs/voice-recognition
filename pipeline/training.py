@@ -11,6 +11,8 @@ from keras.models import Sequential, Model
 from keras.layers import Dense, LSTM, Dropout
 from keras.callbacks import TensorBoard
 
+from importing import spectrogram_from_file, prep_spectrogram
+
 
 class LSTMConfig(BaseStepConfig):
     """LSTM params"""
@@ -61,7 +63,8 @@ class AudioClassifier(mlflow.pyfunc.PythonModel):
         #     wav_bytes_to_spectrogram(base64.b64decode(model_input)),
         #     self.timesteps
         # )
-        return np.array([[1, 2, 3], [4, 5, 6]])
+        return prep_spectrogram(spectrogram_from_file("audio/hello/1.wav"), new_timesteps=200)
+        # return np.array([[1, 2, 3], [4, 5, 6]])
 
     def __init__(self, model: keras.engine.training.Model, timesteps: int):
         self.model = model
