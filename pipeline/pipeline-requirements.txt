@@ -2,4 +2,4 @@ librosa
 numpy==1.21
 tensorflow==2.8.0
 tensorflow_io==0.24.0
-zenml==0.6.3
+zenml==0.7.0
