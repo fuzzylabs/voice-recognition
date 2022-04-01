@@ -52,16 +52,25 @@ N.b. To get the latest version of the dataset `dvc pull -r origin` should be run
 
 ### Running the pipeline locally
 
-To run the ZenML pipeline run the following in the `pipeline` directory:
+To run the ZenML pipeline first, run the following in the `pipeline` directory:
 ```shell
 python run.py
 ```
 This runs the pipeline, which trains the model and stores the artifacts from the pipeline in the local store.
+The `custom_mlflow_model_deployer` prints the file path the model has been saved to it's referred to below as
+<model_path>, to deploy the pipeline, run the following from the pipeline directory:
+* Copy AudioClassifier.py to the path printed above
+* run ` mlflow models serve -m . --no-conda` in the path directory printed above
+```shell
+cp AudioClassifier.py <model_path>
+mlflow models serve -m <model_path> --no-conda
+```
+
 
 It also starts a [TensorBoard](https://www.tensorflow.org/tensorboard/) server, which can be accessed at `localhost:5000`
 and needs to be closed after usage with `python run.py --stop-tensorboard`
 
-You also get a REST API which takes a spectrogram numpy array.
+The REST API takes a spectrogram numpy array.
 [httprequest.py](../httprequest.py) is an example request, which encodes an audio file and classifies it using the API.
 The MLFlow REST API is closed by running `python run.py --stop-service`.
 

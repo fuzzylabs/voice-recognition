@@ -13,7 +13,6 @@ from zenml.services import load_last_service_from_step
 from zenml.environment import Environment
 
 from zenml.integrations.tensorflow.visualizers import (
-    visualize_tensorboard,
     stop_tensorboard_server,
 )
 

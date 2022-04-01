@@ -73,16 +73,16 @@ def predictor(
     return prediction
 
 
-# @pipeline(enable_cache=True, requirements_file="pipeline-requirements.txt")
-# def inference_pipeline(
-#         get_words,
-#         spectrogram_producer,
-#         prediction_service_loader,
-#         predictor,
-# ):
-#     X_train, X_test, y_train, y_test, timesteps = spectrogram_producer(get_words())
-#     model_deployment_service = prediction_service_loader()
-#     predictor(model_deployment_service, X_test)
+@pipeline(enable_cache=True, requirements_file="pipeline-requirements.txt")
+def inference_pipeline(
+        get_words,
+        spectrogram_producer,
+        prediction_service_loader,
+        predictor,
+):
+    X_train, X_test, y_train, y_test, timesteps = spectrogram_producer(get_words())
+    model_deployment_service = prediction_service_loader()
+    predictor(model_deployment_service, X_test)
 
 
 model_deployer = mlflow_deployer_step(name="model_deployer")
