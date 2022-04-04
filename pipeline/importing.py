@@ -68,6 +68,21 @@ def spectrogram_from_dvc(file_path):
     return wav_bytes_to_spectrogram(wav_bytes)
 
 
+def prep_class_spectrograms(spectrograms: np.array, labels: np.array, maximum_X: int, number_of_cases: int = 200):
+    prepared_spectrograms = np.array([prep_spectrogram(s, new_timesteps=maximum_X) for s in spectrograms])
+
+    reshaped_prepared_spectrograms = prepared_spectrograms.reshape(
+        (prepared_spectrograms.shape[0], prepared_spectrograms.shape[1], prepared_spectrograms.shape[2], 1)
+    )
+
+    data_generator = ImageDataGenerator(width_shift_range=0.3, brightness_range=(-0.3, 0.3))
+    data_generator.fit(reshaped_prepared_spectrograms)
+    X_iterator = data_generator.flow(reshaped_prepared_spectrograms, y=labels, batch_size=number_of_cases)
+
+    Xs, ys = X_iterator.next()
+    return Xs.reshape((Xs.shape[0], Xs.shape[1], Xs.shape[2])), ys
+
+
 class LoadSpectrogramConfig(BaseStepConfig):
     # N.B. Timesteps must be more than the maximum X value of the desired inputs
     max_timesteps: int = None
@@ -114,30 +129,16 @@ def load_spectrogram_from_file() -> Output(
     return X_train, X_test, y_train, y_test, max([i.shape[1] for i in X])
 
 
-def prep_class_spectrograms(spectrograms: List[Any], labels: List[int], maximum_X: int, number_of_cases: int = 200):
-    prepared_spectrograms = np.array([prep_spectrogram(s, new_timesteps=maximum_X) for s in spectrograms])
-
-    reshaped_prepared_spectrograms = prepared_spectrograms.reshape(
-        (prepared_spectrograms.shape[0], prepared_spectrograms.shape[1], prepared_spectrograms.shape[2], 1)
-    )
-
-    data_generator = ImageDataGenerator(width_shift_range=0.3)
-    data_generator.fit(reshaped_prepared_spectrograms)
-    X_iterator = data_generator.flow(reshaped_prepared_spectrograms, y=labels, batch_size=number_of_cases)
-
-    Xs, ys = X_iterator.next()
-    return Xs.reshape((Xs.shape[0], Xs.shape[1], Xs.shape[2])), ys
-
-
 @step
 def dvc_load_spectrograms(
     hello_words: np.ndarray,
     goodbye_words: np.ndarray,
     config: LoadSpectrogramConfig,
 ) -> Output(
-    X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray, timesteps=int
+    # TODO: Typing these as List causes errors
+    X=List, y=List, maximum_X=int
 ):
-    """Loads the wav files from DVC as spectrograms and split them into training and testing split"""
+    """Loads the wav files from DVC as spectrograms"""
     X = []
     y = []
     for i, file_path in enumerate(hello_words):
@@ -152,8 +153,20 @@ def dvc_load_spectrograms(
     else:
         maximum_X = config.max_timesteps
 
+    return X, y, maximum_X
+
+
+@step
+def preprocess_spectrograms(
+    X: List,
+    y: List,
+    maximum_X: int,
+) -> Output(
+    X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray
+):
+    """pre-process spectrograms and split them into training and testing sets"""
     X, y = prep_class_spectrograms(X, y, maximum_X=maximum_X)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
-    return X_train, X_test, y_train, y_test, maximum_X
+    return X_train, X_test, y_train, y_test

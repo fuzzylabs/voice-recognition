@@ -73,6 +73,7 @@ def train_evaluate_and_deploy_pipeline(
 def dvc_train_evaluate_and_deploy_pipeline(
     get_paths_by_file,
     dvc_load_spectrograms,
+    preprocess_spectrograms,
     lstm_trainer,
     keras_evaluator,
     deployment_trigger,
@@ -80,7 +81,8 @@ def dvc_train_evaluate_and_deploy_pipeline(
 ):
     """Links the get_words and spectrogram_producer steps together in a pipeline"""
     hello_words, goodbye_words = get_paths_by_file()
-    X_train, X_test, y_train, y_test, timesteps = dvc_load_spectrograms(hello_words=hello_words, goodbye_words=goodbye_words)
+    X, y, timesteps = dvc_load_spectrograms(hello_words=hello_words, goodbye_words=goodbye_words)
+    X_train, X_test, y_train, y_test = preprocess_spectrograms(X=X, y=y, maximum_X=timesteps)
     model = lstm_trainer(X_train=X_train, y_train=y_train, timesteps=timesteps)
     loss, accuracy = keras_evaluator(X_test=X_test, y_test=y_test, model=model)
     deployment_decision = deployment_trigger(accuracy=accuracy)
@@ -95,12 +97,13 @@ def dvc_train_evaluate_and_deploy_pipeline(
 def dvc_train_evaluate_pipeline(
     get_paths_by_file,
     dvc_load_spectrograms,
+    preprocess_spectrograms,
     lstm_trainer,
     keras_evaluator
 ):
     """Links the get_words and spectrogram_producer steps together in a pipeline"""
     hello_words, goodbye_words = get_paths_by_file()
-    X_train, X_test, y_train, y_test, timesteps = dvc_load_spectrograms(hello_words=hello_words, goodbye_words=goodbye_words)
+    X, y, timesteps = dvc_load_spectrograms(hello_words=hello_words, goodbye_words=goodbye_words)
+    X_train, X_test, y_train, y_test = preprocess_spectrograms(X=X, y=y, maximum_X=timesteps)
     model = lstm_trainer(X_train=X_train, y_train=y_train, timesteps=timesteps)
     keras_evaluator(X_test=X_test, y_test=y_test, model=model)
-
