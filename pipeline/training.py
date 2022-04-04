@@ -29,6 +29,10 @@ def lstm_trainer(
     timesteps: int,
 ) -> Model:
     """Train a LSTM to tell the difference between hello and goodbye spectrograms"""
+
+    mlflow.log_param("Optimizer", config.optimizer)
+    mlflow.log_param("Loss Function", config.loss)
+
     model = Sequential()
 
     model.add(LSTM(units=64, return_sequences=True, input_shape=(timesteps, 1025)))

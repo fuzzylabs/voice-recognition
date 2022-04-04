@@ -2,6 +2,7 @@
 from zenml.integrations.constants import TENSORFLOW, MLFLOW
 from zenml.pipelines import pipeline
 
+
 @pipeline
 def load_spectrogram_pipeline(
     get_words,
@@ -26,6 +27,7 @@ def train_and_evaluate_pipeline(
     X_train, X_test, y_train, y_test, timesteps = spectrogram_producer(get_words())
     model = lstm_trainer(X_train=X_train, y_train=y_train, timesteps=timesteps)
     keras_evaluator(X_test=X_test, y_test=y_test, model=model)
+
 
 @pipeline(
     required_integrations=[TENSORFLOW],

@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 
 import dvc.api
 
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 
 
 @step
@@ -19,6 +19,7 @@ def get_words() -> Output(
 ):
     """Returns paths to folders with example data for each word"""
     return np.array(["audio/hello", "audio/goodbye"])
+
 
 @step
 def get_paths_by_file() -> Output(
