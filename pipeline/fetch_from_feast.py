@@ -20,8 +20,8 @@ store = FeatureStore(repo_path="feature_repo")
 training_df = store.get_historical_features(
     entity_df=entity_df,
     features=[
-        "audio_files:raw_audio",
-        "audio_files:label",
+        "audio_files:spectrogram_extended_bytes",
+        "audio_files:transcript",
     ],
 ).to_df()
 
@@ -29,5 +29,5 @@ print("----- Feature schema -----\n")
 print(training_df.info())
 
 print()
-print("----- Example features -----\n")
+print("----- Features -----\n")
 print(training_df.head())

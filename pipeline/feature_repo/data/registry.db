@@ -7,12 +7,17 @@ __dummy_idJfeature_repo
 N
 .
 audio_idAudio ID"audio_idJfeature_repo
-×•±’¸ı‰×•±’¸ı‰1"$c3d1607d-5a69-492f-b269-d0b631bd5f39*åÔ±’àãÓ72É
-ª
-audio_filesfeature_repoaudio_id"
-	raw_audio"	
-label2€£:àevent_timestampZKI/home/ollie/FuzzyLabs/mlops/voice-recognition/parquet/audio_files.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢I/home/ollie/FuzzyLabs/mlops/voice-recognition/parquet/audio_files.parquet@
-åÔ±’€­Æ7åÔ±’€­Æ7R§
+×•±’¸ı‰×•±’¸ı‰1"$98d9d924-0e2a-4402-9d63-b8dbbec3fa3d*Ö¾…“Ğƒ´ç2¤
+…
+audio_filesfeature_repoaudio_id"
+audio_id"
+	file_path"
+spectrogram_bytes"
+spectrogram_extended_bytes"
+audio_bytes"
+
+transcript2€£:àevent_timestampZKI/home/ollie/FuzzyLabs/mlops/voice-recognition/parquet/audio_files.parquetŠ1feast.infra.offline_stores.file_source.FileSource¢I/home/ollie/FuzzyLabs/mlops/voice-recognition/parquet/audio_files.parquet@
+è·…“Øœè·…“ØœR§
 ¤
 ,feast.infra.online_stores.sqlite.SqliteTable"t
 X/home/ollie/FuzzyLabs/mlops/voice-recognition/pipeline/feature_repo/data/online_store.dbfeature_repo_audio_filesb»event_timestampZKI/home/ollie/FuzzyLabs/mlops/voice-recognition/parquet/audio_files.parquet¢I/home/ollie/FuzzyLabs/mlops/voice-recognition/parquet/audio_files.parquetªfeature_repo
