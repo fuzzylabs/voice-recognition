@@ -104,3 +104,15 @@ def dvc_train_evaluate_pipeline(
     model = lstm_trainer(X_train=X_train, y_train=y_train, timesteps=timesteps)
     keras_evaluator(X_test=X_test, y_test=y_test, model=model)
 
+@pipeline(
+    requirements_file="pipeline-requirements.txt",
+    enable_cache=True,
+)
+def feast_train_evaluate_pipeline(
+    feast_load_spectrograms,
+    lstm_trainer,
+    keras_evaluator
+):
+    X_train, X_test, y_train, y_test, timesteps = feast_load_spectrograms()
+    model = lstm_trainer(X_train=X_train, y_train=y_train, timesteps=timesteps)
+    keras_evaluator(X_test=X_test, y_test=y_test, model=model)

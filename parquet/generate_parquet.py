@@ -4,6 +4,7 @@ from typing import Dict
 import pandas as pd
 import librosa
 import numpy as np
+import pickle
 
 
 def spectrogram_from_samples(samples):
@@ -48,7 +49,7 @@ def add_audio(dictionary: Dict, audio_id: int, path: str, label: str):
         dictionary["file_path"].append(path)
         dictionary["spectrogram_bytes"].append(spectrogram_from_file(path).tobytes())
         dictionary["spectrogram_extended_bytes"].append(
-            prep_spectrogram(spectrogram_from_file(path), new_timesteps=200).tobytes()
+            pickle.dumps(prep_spectrogram(spectrogram_from_file(path), new_timesteps=200))
         )
         dictionary["event_timestamp"].append(datetime.fromtimestamp(os.stat(path).st_mtime))
 
