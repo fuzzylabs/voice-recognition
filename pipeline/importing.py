@@ -179,10 +179,10 @@ def dvc_cli_load_spectrograms(
     X = []
     y = []
     for i, file_path in enumerate(hello_words):
-        X += [spectrogram_from_file(file_path)]
+        X += [spectrogram_from_file(f"../{file_path}")]
         y += [[1, 0]]
     for i, file_path in enumerate(goodbye_words):
-        X += [spectrogram_from_file(file_path)]
+        X += [spectrogram_from_file(f"../{file_path}")]
         y += [[0, 1]]
 
     if config.max_timesteps is None:
