@@ -3,7 +3,7 @@ from zenml.integrations.mlflow.mlflow_environment import MLFLOW_ENVIRONMENT_NAME
 from zenml.integrations.mlflow.steps import MLFlowDeployerConfig
 
 from evaluating import keras_evaluator
-from importing import LoadSpectrogramConfig, get_paths_by_file, dvc_load_spectrograms
+from importing import LoadSpectrogramConfig, get_paths_by_file, dvc_load_spectrograms, dvc_cli_load_spectrograms
 from deployment import deployment_trigger, DeploymentTriggerConfig, model_deployer
 from training import LSTMConfig, lstm_trainer
 from zenpipeline import dvc_train_evaluate_and_deploy_pipeline, dvc_train_evaluate_pipeline
@@ -36,7 +36,7 @@ def run_deploy_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str)
 def run_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
     deployment = dvc_train_evaluate_pipeline(
         get_paths_by_file=get_paths_by_file(),
-        dvc_load_spectrograms=dvc_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
+        dvc_load_spectrograms=dvc_cli_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
         lstm_trainer=lstm_trainer(config=LSTMConfig(
             epochs=epochs,
             batch_size=batch_size,
