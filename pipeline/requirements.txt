@@ -1,4 +1,4 @@
-zenml==0.6.3
+zenml==0.7.0
 dvc
 soundfile
 librosa

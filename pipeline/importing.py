@@ -1,5 +1,6 @@
 import io
 import os
+from typing import List, Any
 
 import soundfile
 from zenml.steps import Output, step, BaseStepConfig
@@ -9,6 +10,8 @@ from sklearn.model_selection import train_test_split
 
 import dvc.api
 
+from keras.preprocessing.image import ImageDataGenerator
+
 
 @step
 def get_words() -> Output(
@@ -16,6 +19,7 @@ def get_words() -> Output(
 ):
     """Returns paths to folders with example data for each word"""
     return np.array(["audio/hello", "audio/goodbye"])
+
 
 @step
 def get_paths_by_file() -> Output(
@@ -94,7 +98,7 @@ def load_spectrograms_from_audio(
 
     X, y = np.array(X), np.array(y)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
     return X_train, X_test, y_train, y_test, maximum_X
 
@@ -105,9 +109,24 @@ def load_spectrogram_from_file() -> Output(
 ):
     """Loads the spectrograms saved in an np array directly from ../spectrograms/spectrograms.npy"""
     X, y = np.load("../spectrograms/spectrograms.npy"), np.load("../spectrograms/labels.npy")
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
     return X_train, X_test, y_train, y_test, max([i.shape[1] for i in X])
+
+
+def prep_class_spectrograms(spectrograms: List[Any], labels: List[int], maximum_X: int, number_of_cases: int = 200):
+    prepared_spectrograms = np.array([prep_spectrogram(s, new_timesteps=maximum_X) for s in spectrograms])
+
+    reshaped_prepared_spectrograms = prepared_spectrograms.reshape(
+        (prepared_spectrograms.shape[0], prepared_spectrograms.shape[1], prepared_spectrograms.shape[2], 1)
+    )
+
+    data_generator = ImageDataGenerator(width_shift_range=0.3)
+    data_generator.fit(reshaped_prepared_spectrograms)
+    X_iterator = data_generator.flow(reshaped_prepared_spectrograms, y=labels, batch_size=number_of_cases)
+
+    Xs, ys = X_iterator.next()
+    return Xs.reshape((Xs.shape[0], Xs.shape[1], Xs.shape[2])), ys
 
 
 @step
@@ -123,21 +142,18 @@ def dvc_load_spectrograms(
     y = []
     for i, file_path in enumerate(hello_words):
         X += [spectrogram_from_dvc(file_path)]
-        y += [0]
+        y += [[1, 0]]
     for i, file_path in enumerate(goodbye_words):
         X += [spectrogram_from_dvc(file_path)]
-        y += [1]
+        y += [[0, 1]]
 
     if config.max_timesteps is None:
         maximum_X = max([i.shape[1] for i in X])
     else:
         maximum_X = config.max_timesteps
 
-    # Pad the values of X with 0s upto the maximum time steps and transpose the matrix
-    X = [prep_spectrogram(i, maximum_X) for i in X]
+    X, y = prep_class_spectrograms(X, y, maximum_X=maximum_X)
 
-    X, y = np.array(X), np.array(y)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
     return X_train, X_test, y_train, y_test, maximum_X
