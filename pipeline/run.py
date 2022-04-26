@@ -153,7 +153,7 @@ def main(
     elif importing == "feast":
         run_feast_pipeline(epochs=epochs, batch_size=batch_size, optimizer=optimizer, loss=loss)
     else:
-        raise ValueError(f"{importing} is not a valid importing method, expected dvc or feast")
+        raise ValueError(f"{importing} is not a valid importing method, expected dvc, dvc_cli or feast")
 
     service = load_last_service_from_step(
         pipeline_name="dvc_train_evaluate_and_deploy_pipeline",
