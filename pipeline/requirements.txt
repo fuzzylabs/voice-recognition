@@ -2,3 +2,4 @@ zenml==0.7.0
 dvc
 librosa
 numpy==1.21
+feast

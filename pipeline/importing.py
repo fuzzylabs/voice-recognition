@@ -2,10 +2,15 @@ import io
 import os
 import subprocess
 from typing import List, Any
+import pickle
+from datetime import datetime
+from typing import List, Any
 
 import soundfile
+from feast import FeatureStore
 from zenml.steps import Output, step, BaseStepConfig
 import numpy as np
+import pandas as pd
 import librosa
 from sklearn.model_selection import train_test_split
 
@@ -195,3 +200,52 @@ def dvc_cli_load_spectrograms(
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
 
     return X_train, X_test, y_train, y_test, maximum_X
+
+
+def transcript_to_label(transcript: str) -> List[int]:
+    if transcript == "hello":
+        return [1, 0]
+    elif transcript == "goodbye":
+        return [0, 1]
+    else:
+        raise ValueError(f"No label value for {transcript}, expected 'hello' or 'goodbye'")
+
+
+@step
+def feast_load_spectrograms(
+    config: LoadSpectrogramConfig,
+) -> Output(
+    X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray, timesteps=int
+):
+    """Loads the extended spectrogram bytes from FEAST, decodes them and splits them into training and testing"""
+    entity_df = pd.DataFrame.from_dict(
+        {
+            "audio_id": [0, 1, 2],
+            "event_timestamp": [
+                datetime(2022, 3, 25, 16, 15, 4, 548965),
+                datetime(2022, 3, 25, 16, 15, 4, 676967),
+                datetime(2022, 3, 25, 16, 15, 4, 700967),
+            ],
+        }
+    )
+
+    store = FeatureStore(repo_path="feature_repo")
+
+    training_df = store.get_historical_features(
+        entity_df=entity_df,
+        features=[
+            "audio_files:spectrogram_extended_bytes",
+            "audio_files:transcript",
+        ],
+    ).to_df()
+
+    X = np.array([
+        pickle.loads(spectrogram_bytes) for spectrogram_bytes in training_df["spectrogram_extended_bytes"]
+    ])
+    y = np.array([transcript_to_label(transcript) for transcript in training_df["transcript"]])
+
+    print(y)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
+
+    return X_train, X_test, y_train, y_test, config.max_timesteps
