@@ -1,4 +1,5 @@
 zenml==0.7.0
 dvc
-soundfile
 librosa
+numpy==1.21
+feast
