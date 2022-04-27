@@ -64,6 +64,12 @@ This runs the pipeline, which trains the model and stores the artifacts from the
 There are flags for specifying specific training hyperparameters, for example:
 `python run.py --epochs 2 --batch_size 5 --optimizer adadelta --loss mean_absolute_error`
 
+There is also an `--importing` flag which takes 4 possible options:
+* dvc - which runs the dvc_cli option, this is the default if the flag is not specified
+* dvc_cli - Imports the data by running the correct dvc commands to pull the required training data then fetch it
+* dvc_library - Imports the files using the dvc python library
+* feast - which uses the [Feast feature store](#Feast_feature_store) to fetch the required training data
+
 You also get a REST API which takes a spectrogram numpy array.
 [httprequest.py](../httprequest.py) is an example request, which encodes an audio file and classifies it using the API.
 The MLFlow REST API is closed by running `python run.py --stop-service`.
@@ -112,6 +118,26 @@ The tracking UI displays the parameters, artifacts and evaluation metrics record
 graphed and compared in a myriad of ways, see the [MLFlow documentation](https://mlflow.org/docs/latest/tracking.html#tracking-ui)
 for more information.
 
+## Feast feature store
+The project can be configured to use a Feast feature store to importing the training data.
+For more information on Feast and feature stores see their [website](https://feast.dev/) or our
+[feature store blog](https://www.fuzzylabs.ai/blog-post/feature-stores-an-introduction-with-feast).
+
+First generate the parquet files:
+```shell
+dvc checkout
+python parquet/generate_parquet.py
+```
+
+Then set up the feast repository:
+```shell
+cd pipeline/feature_repo
+feast apply
+```
+
+Now when you run the pipeline you can use the `feast` importing method:
+`python run.py --importing feast`
+
 ## Setup Kubeflow
 
 Note: ZenML's Kubeflow integration is still experimental and as a result the steps to make this work are a bit cumbersome
@@ -128,13 +154,15 @@ zenml integration install kubeflow
 Then set up the local container registry and local kubeflow orchestrator and combine them into the Kubeflow stack:
 ```shell
 # Make sure to create the local registry on port 5000 for it to work 
-zenml container-registry register local_registry --type=default --uri=localhost:5000 
-zenml orchestrator register kubeflow_orchestrator --type=kubeflow
+zenml container-registry register default --type=default --uri=localhost:5000 
+zenml orchestrator register kubeflow --type=kubeflow
+zenml secrets-manager register default -t local
 zenml stack register local_kubeflow_stack \
-    -m local_metadata_store \
-    -a local_artifact_store \
-    -o kubeflow_orchestrator \
-    -c local_registry
+    -m default \
+    -a default \
+    -o kubeflow \
+    -c default \
+    -x default
 
 # Activate the newly created stack
 zenml stack set local_kubeflow_stack
