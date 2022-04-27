@@ -35,7 +35,7 @@ def run_deploy_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str)
     deployment.run()
 
 
-def run_dvc_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
+def run_dvc_library_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str):
     deployment = dvc_train_evaluate_pipeline(
         get_paths_by_file=get_paths_by_file(),
         dvc_load_spectrograms=dvc_load_spectrograms(config=LoadSpectrogramConfig(max_timesteps=200)),
@@ -107,7 +107,7 @@ def run_dvc_cli_pipeline(epochs: int, batch_size: int, optimizer: str, loss: str
 @click.option(
     "--importing",
     default="dvc",
-    help="Method for fetching training data: dvc, dvc_cli or feast",
+    help="Method for fetching training data: dvc, dvc_library, dvc_cli or feast",
 )
 def main(
     epochs: int,
@@ -129,8 +129,8 @@ def main(
             service.stop(timeout=10)
         return
 
-    if importing == "dvc":
-        run_dvc_pipeline(epochs=epochs, batch_size=batch_size, optimizer=optimizer, loss=loss)
+    if importing == "dvc_library":
+        run_dvc_library_pipeline(epochs=epochs, batch_size=batch_size, optimizer=optimizer, loss=loss)
 
         mlflow_env = Environment()[MLFLOW_ENVIRONMENT_NAME]
         print(
@@ -140,7 +140,7 @@ def main(
             "You can find your runs tracked within the `mlflow_example_pipeline`"
             "experiment. There you'll also be able to compare two or more runs.\n\n"
         )
-    elif importing == 'dvc_cli':
+    elif importing == "dvc" or importing == 'dvc_cli':
         run_dvc_cli_pipeline(epochs=epochs, batch_size=batch_size, optimizer=optimizer, loss=loss)
         mlflow_env = Environment()[MLFLOW_ENVIRONMENT_NAME]
         print(
