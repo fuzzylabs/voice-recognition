@@ -1,5 +1,7 @@
 import io
 import os
+import subprocess
+from typing import List, Any
 import pickle
 from datetime import datetime
 from typing import List, Any
@@ -149,6 +151,43 @@ def dvc_load_spectrograms(
         y += [[1, 0]]
     for i, file_path in enumerate(goodbye_words):
         X += [spectrogram_from_dvc(file_path)]
+        y += [[0, 1]]
+
+    if config.max_timesteps is None:
+        maximum_X = max([i.shape[1] for i in X])
+    else:
+        maximum_X = config.max_timesteps
+
+    X, y = prep_class_spectrograms(X, y, maximum_X=maximum_X)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
+
+    return X_train, X_test, y_train, y_test, maximum_X
+
+
+@step
+def dvc_cli_load_spectrograms(
+    hello_words: np.ndarray,
+    goodbye_words: np.ndarray,
+    config: LoadSpectrogramConfig,
+) -> Output(
+    X_train=np.ndarray, X_test=np.ndarray, y_train=np.ndarray, y_test=np.ndarray, timesteps=int
+):
+    """Loads the wav files from DVC as spectrograms and split them into training and testing split"""
+
+    if subprocess.call("dvc pull -r origin", shell=True) != 0:
+        raise RuntimeError("dvc pull -r origin returned a non-zero status code")
+
+    if subprocess.call("dvc checkout", shell=True) != 0:
+        raise RuntimeError("dvc checkout returned a non-zero status code")
+
+    X = []
+    y = []
+    for i, file_path in enumerate(hello_words):
+        X += [spectrogram_from_file(f"../{file_path}")]
+        y += [[1, 0]]
+    for i, file_path in enumerate(goodbye_words):
+        X += [spectrogram_from_file(f"../{file_path}")]
         y += [[0, 1]]
 
     if config.max_timesteps is None:
